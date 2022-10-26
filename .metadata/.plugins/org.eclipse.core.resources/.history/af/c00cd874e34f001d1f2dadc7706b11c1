@@ -1,0 +1,67 @@
+package persistence;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import entity.Produto;
+
+public class ProdutoDao extends Dao{
+	
+	public boolean incluirProdutoDB(Produto p) throws Exception{
+		boolean SUCESS = false;
+		
+		try {
+			open();
+			stmt = con.prepareStatement("insert into produto values(null,?,?,?,?,?,?,?)");
+			stmt.setString(1,p.getNome());
+			stmt.setInt(2, p.getCategoria());
+			stmt.setInt(3, p.getQuantidade());
+			stmt.setFloat(4, p.getPreco());
+			//stmt.setBoolean(5, p.getTemLojaFisica());
+			stmt.setString(5, p.getTemLojaFisica());
+			stmt.setString(6, UtilsBanco.convertDateToDataBase(p.getDataValidade()));
+			stmt.setString(7, p.getDescricao());
+			
+			stmt.execute();
+			SUCESS = true;
+			
+		}catch(SQLException e) {
+			System.out.println(e.getErrorCode());
+			System.out.println(e.getMessage());
+		}finally {
+			close();
+		}
+		
+		return SUCESS;
+	}
+	
+	public List<Produto> listarProdutos(String nome) throws Exception{
+		
+		List<Produto> listaProdutos = new ArrayList<>();
+		
+		try {
+			open();
+			//stmt = con.prepareStatement("select * from produto where nome like ?");
+			stmt = con.prepareStatement("select codigo, nome from produto where nome like ?");
+			stmt.setString(1, "%"+nome+"%");
+			rs = stmt.executeQuery();
+			
+			while(rs.next()) {
+				Produto produto = new Produto();
+				produto.setCodigo(rs.getInt("codigo"));
+				produto.setNome(rs.getString("nome"));
+				listaProdutos.add(produto);
+				
+			}
+			
+		}catch(SQLException e) {
+			
+		}finally {
+			close();
+		}
+		
+		return listaProdutos;
+	}
+
+}

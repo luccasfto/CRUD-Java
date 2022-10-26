@@ -1,0 +1,168 @@
+package control;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import entity.Produto;
+import persistence.ProdutoDao;
+import persistence.UtilsBanco;
+
+@WebServlet({"/ProdutoControle","/incluirproduto","/alterarproduto","/listarproduto","/consultarproduto","/excluirproduto"})
+public class ProdutoControle extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public ProdutoControle() {
+        super();
+    }
+    
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		//response.getWriter().append("Served at: ").append(request.getContextPath());
+		execute(request, response);
+	}
+	
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		//doGet(request, response);
+		execute(request, response);
+	}
+	
+	protected void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String url = request.getServletPath();
+		if(url.equals("/incluirproduto")) {
+			incluir(request, response);
+		}else if(url.equals("/listarproduto")) {
+			listar(request, response);
+		}else if(url.equals("/consultarproduto")) {
+			consultar(request, response);
+		}else if(url.equals("/excluirproduto")) {
+			excluir(request, response);
+		}
+		
+		//System.out.println(url); //ctrl + espaço = completa o Syso -> (System.out.println)
+	} 
+	
+	protected void listar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		System.out.println("Listar");
+		String nomePesquisa = request.getParameter("nome");
+		System.out.println(nomePesquisa);
+		
+		try {
+			ProdutoDao pd = new ProdutoDao();
+			List<Produto> listaProdutos = pd.listarProdutos(nomePesquisa);
+			if(listaProdutos.size()==0) {
+				request.setAttribute("msg", "<div class='alert-danger'>Nenhum produto encontrado!</div>");
+			}else {
+				request.setAttribute("lp", listaProdutos);
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+;		}finally {
+			request.getRequestDispatcher("listarprodutos.jsp").forward(request, response);
+
+		}
+	}
+	
+	protected void consultar(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		try {
+			Integer codigo = Integer.parseInt(request.getParameter("codigo"));
+			ProdutoDao pd = new ProdutoDao();
+			Produto produto = pd.consultarProduto(codigo);
+			
+			if(produto ==null) {
+				request.setAttribute("msg", "<div class='alert-danger'>Produto não encontrado!</div>");
+				request.getRequestDispatcher("listarprodutos.jsp").forward(request, response);
+			}else {
+				request.setAttribute("prod", produto);
+				request.setAttribute("op", "C");
+				request.getRequestDispatcher("produto.jsp").forward(request, response);
+
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected void incluir(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		try {
+			
+			String nome = request.getParameter("nome");
+			String categoria = request.getParameter("categoria");
+			String lojaFisica = request.getParameter("lojafisica");
+			String quantidade = request.getParameter("quantidade");
+			String preco = request.getParameter("preco");
+			String dataValidade = request.getParameter("dataValidade");
+			String descricao = request.getParameter("descricao");
+			
+			/*
+			Boolean temLojaFisica;
+			if(lojaFisica.equals("S")) {
+				temLojaFisica = true;
+			}else {
+				temLojaFisica = false;
+			}*/
+			
+			Produto p = new Produto();
+			p.setNome(nome);
+			p.setCategoria(Integer.parseInt(categoria));
+			p.setTemLojaFisica(lojaFisica);
+			//p.setTemLojaFisica(temLojaFisica);
+			p.setQuantidade(Integer.parseInt(quantidade));
+			p.setPreco(Float.parseFloat(preco.replace(',', '.'))); 
+			p.setDataValidade(UtilsBanco.converterData(dataValidade));
+			p.setDescricao(descricao);
+			//System.out.println(p);
+			
+			ProdutoDao pd = new ProdutoDao();
+			
+			if(pd.incluirProdutoDB(p)) {
+				request.setAttribute("msg", "<div class='alert-sucess'>Produto cadastrado com sucesso</div>");
+			}else {
+				request.setAttribute("msg", "<div class='alert-danger'>Erro ao cadastrar produto</div>");
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			request.setAttribute("msg", "<div class='alert-danger'>Erro ao cadastrar produto!</div>");
+			
+		}finally {
+			request.getRequestDispatcher("produto.jsp").forward(request, response);
+		}
+		
+	}
+	
+	protected void excluir(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String msg = "";
+		try {
+			Integer codigo = Integer.parseInt(request.getParameter("codigo"));
+			ProdutoDao pd = new ProdutoDao();
+			if(pd.excluirProduto(codigo)) {
+				msg = "<div class='alert-sucess'>Produto excluido com sucesso!</div>";
+			}else {
+				msg = "<div class='alert-danger'>Erro ao excluir produto!</div>";
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}finally {
+			response.getWriter().println(msg);
+		}
+	}
+
+}

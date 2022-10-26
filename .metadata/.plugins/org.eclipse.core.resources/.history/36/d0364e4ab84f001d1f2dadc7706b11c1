@@ -1,0 +1,27 @@
+package persistence;
+
+import entity.Produto;
+
+public class ProdutoDao extends Dao{
+	
+	public boolean incluirProdutoDB(Produto p) throws Exception{
+		boolean SUCESS = false;
+		
+		try {
+			open();
+			stmt = con.prepareStatement("insert into produto values(?,?,?,?,?,?,?)");
+			stmt.setString(1,p.getNome());
+			stmt.setInt(2, p.getCategoria());
+			stmt.setInt(3, p.getQuantidade());
+			stmt.setFloat(4, p.getPreco());
+			stmt.setBoolean(5, p.isTemLojaFisica());
+			
+			
+			
+			
+		}catch()
+		
+		return SUCESS;
+	}
+
+}

@@ -1,0 +1,7 @@
+INDEX VERSION 1.131
+C:\Users\lucca\Desktop\eclipse-workspace\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\2206661388.index
+\cadastroProduto\src\main\java
+C:\Users\Bruno\eclipse-workspace\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\2206661388.index
+\cadastroProduto\src\main\java
+C:\Users\Bruno\eclipse-workspace\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\3177928685.index
+\cadastroProdutoNew\src\main\java
